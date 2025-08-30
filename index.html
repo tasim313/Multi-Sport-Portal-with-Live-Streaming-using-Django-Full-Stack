@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sports Portal - Live Cricket, Football & Tennis</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Watch live cricket, football, tennis matches with real-time scores, news, and analysis. Your ultimate sports destination." />
+    <meta name="keywords" content="live cricket, football, tennis, sports news, live streaming, scores, matches" />
+    <meta name="author" content="Sports Portal" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sportsportal.com/" />
+    <meta property="og:title" content="Sports Portal - Live Sports Streaming & News" />
+    <meta property="og:description" content="Watch live cricket, football, tennis matches with real-time scores, news, and analysis." />
+    <meta property="og:image" content="/images/Sports.jpg" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://sportsportal.com/" />
+    <meta property="twitter:title" content="Sports Portal - Live Sports Streaming & News" />
+    <meta property="twitter:description" content="Watch live cricket, football, tennis matches with real-time scores, news, and analysis." />
+    <meta property="twitter:image" content="/images/LiveSports.jpg" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.jpg" />
+    <link rel="icon" type="image/png" href="/images/favicon.jpg" />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://www.youtube.com https://player.vimeo.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https: http:;
+        frame-src 'self' https://www.youtube.com https://player.vimeo.com https://www.youtube-nocookie.com;
+        connect-src 'self' ws: wss:;
+    ">
+    
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#0B6E4F" />
+    <meta name="msapplication-TileColor" content="#0B6E4F" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Sports Portal",
+        "url": "https://sportsportal.com",
+        "description": "Live sports streaming, scores, and news for cricket, football, and tennis",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://sportsportal.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    
+    <style>
+        /* Critical CSS for initial load */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0B6E4F 0%, #1E293B 100%);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Color Variables */
+        :root {
+            --color-primary: #0B6E4F;
+            --color-secondary: #1E293B;
+            --color-accent: #F59E0B;
+            --color-surface: #FFFFFF;
+            --color-muted: #E5E7EB;
+            --color-text: #1E293B;
+            --color-text-light: #64748B;
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-surface: #1E293B;
+                --color-text: #F8FAFC;
+                --color-text-light: #CBD5E1;
+                --color-muted: #374151;
+            }
+            
+            body {
+                background-color: var(--color-surface);
+                color: var(--color-text);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <!-- Loading state -->
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    
+    <!-- React App Script -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker for PWA (optional) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

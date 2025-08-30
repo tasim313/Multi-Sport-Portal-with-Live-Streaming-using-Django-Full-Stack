@@ -1,0 +1,223 @@
+/* Custom Sports Portal Admin Styles */
+
+/* Hide all Wagtail branding and references */
+.wagtail-logo,
+.wagtail-logo-link,
+.wagtail-userbar-logo,
+.wagtail-userbar-logo-link {
+    display: none !important;
+}
+
+/* Custom header styling */
+.header {
+    background: linear-gradient(135deg, #0B6E4F 0%, #1E293B 100%) !important;
+    border-bottom: 3px solid #F59E0B;
+}
+
+/* Custom branding */
+.header .nav-wrapper::before {
+    content: "🏆 Sports Portal CMS";
+    color: #F59E0B;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 20px;
+    display: inline-block;
+    line-height: 50px;
+}
+
+/* Navigation styling */
+.nav-main {
+    background-color: rgba(30, 41, 59, 0.9);
+}
+
+.nav-main a {
+    color: #E5E7EB !important;
+    transition: all 0.3s ease;
+}
+
+.nav-main a:hover,
+.nav-main a.active {
+    background-color: rgba(245, 158, 11, 0.2) !important;
+    color: #F59E0B !important;
+}
+
+/* Button styling */
+.button,
+.button-secondary {
+    background-color: #0B6E4F !important;
+    border-color: #0B6E4F !important;
+    transition: all 0.3s ease;
+}
+
+.button:hover,
+.button-secondary:hover {
+    background-color: #064e38 !important;
+    border-color: #064e38 !important;
+}
+
+.button-primary {
+    background-color: #F59E0B !important;
+    border-color: #F59E0B !important;
+}
+
+.button-primary:hover {
+    background-color: #D97706 !important;
+    border-color: #D97706 !important;
+}
+
+/* Form styling */
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="url"],
+.field textarea,
+.field select {
+    border: 2px solid #E5E7EB;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    border-color: #0B6E4F;
+    box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.1);
+}
+
+/* Success messages */
+.messages .success {
+    background-color: #0B6E4F !important;
+    border-color: #064e38 !important;
+}
+
+/* Error messages */
+.messages .error {
+    background-color: #DC2626 !important;
+    border-color: #B91C1C !important;
+}
+
+/* Warning messages */
+.messages .warning {
+    background-color: #F59E0B !important;
+    border-color: #D97706 !important;
+}
+
+/* Panel styling */
+.panel {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.panel h2,
+.panel h3 {
+    color: #1E293B;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 10px;
+}
+
+/* Table styling */
+.listing th {
+    background-color: #F8FAFC;
+    color: #1E293B;
+    font-weight: 600;
+}
+
+.listing tbody tr:hover {
+    background-color: rgba(11, 110, 79, 0.05);
+}
+
+/* Status indicators */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-tag.live {
+    background-color: #DC2626;
+    color: white;
+}
+
+.status-tag.scheduled {
+    background-color: #2563EB;
+    color: white;
+}
+
+.status-tag.finished {
+    background-color: #6B7280;
+    color: white;
+}
+
+/* Dashboard customizations */
+.dashboard-panel {
+    background: linear-gradient(135deg, #F8FAFC 0%, #E5E7EB 100%);
+    border-left: 4px solid #0B6E4F;
+}
+
+.dashboard-stat {
+    text-align: center;
+    padding: 20px;
+}
+
+.dashboard-stat .number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #0B6E4F;
+}
+
+.dashboard-stat .label {
+    color: #6B7280;
+    font-size: 0.9em;
+}
+
+/* Hide Wagtail help text */
+.help-block:contains("Wagtail"),
+.help-text:contains("Wagtail") {
+    display: none !important;
+}
+
+/* Custom icons for sports */
+.icon-cricket::before { content: "🏏"; }
+.icon-football::before { content: "⚽"; }
+.icon-tennis::before { content: "🎾"; }
+.icon-sports::before { content: "🏆"; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header .nav-wrapper::before {
+        font-size: 16px;
+        margin-right: 10px;
+    }
+    
+    .dashboard-stat {
+        padding: 15px;
+    }
+    
+    .dashboard-stat .number {
+        font-size: 1.5em;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0B6E4F;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #064e38;
+}
