@@ -111,10 +111,6 @@ class HomePage(RoutablePageMixin, Page):
         ('advertisement', AdBlock()),
     ], blank=True, use_json_field=True)
     
-    # SEO fields
-    seo_title = models.CharField(max_length=60, blank=True, help_text="Title for search engines")
-    seo_description = models.TextField(max_length=160, blank=True, help_text="Description for search engines")
-    
     content_panels = Page.content_panels + [
         MultiFieldPanel([
             FieldPanel('hero_title'),
@@ -123,13 +119,8 @@ class HomePage(RoutablePageMixin, Page):
         ], heading="Hero Section"),
         FieldPanel('content_sections'),
     ]
-    
-    promote_panels = Page.promote_panels + [
-        MultiFieldPanel([
-            FieldPanel('seo_title'),
-            FieldPanel('seo_description'),
-        ], heading="SEO Settings"),
-    ]
+
+    promote_panels = Page.promote_panels
     
     # API route for React frontend
     @route(r'^api/content/$')
