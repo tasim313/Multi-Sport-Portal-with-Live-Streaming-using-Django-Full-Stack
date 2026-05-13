@@ -1,19 +1,43 @@
 #!/bin/bash
+set -e
 
 # Wait for database
 echo "Waiting for database..."
-while ! nc -z $DB_HOST 5432; do
+until nc -z "${DB_HOST}" "${DB_PORT:-5432}"; do
   sleep 0.1
 done
 echo "Database started"
 
-# Run migrations
-echo "Running migrations..."
-python manage.py migrate
+if [ -n "${REDIS_URL:-}" ]; then
+  REDIS_HOST="$(python - <<'PY'
+import os
+from urllib.parse import urlparse
 
-# Create superuser if it doesn't exist
-echo "Creating superuser..."
-python manage.py shell -c "
+print(urlparse(os.environ["REDIS_URL"]).hostname or "")
+PY
+)"
+  REDIS_PORT="$(python - <<'PY'
+import os
+from urllib.parse import urlparse
+
+print(urlparse(os.environ["REDIS_URL"]).port or 6379)
+PY
+)"
+  echo "Waiting for Redis..."
+  until nc -z "${REDIS_HOST}" "${REDIS_PORT}"; do
+    sleep 0.1
+  done
+  echo "Redis started"
+fi
+
+if [ "${RUN_STARTUP_TASKS:-0}" = "1" ]; then
+  # Run migrations
+  echo "Running migrations..."
+  python manage.py migrate
+
+  # Create superuser if it doesn't exist
+  echo "Creating superuser..."
+  python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
@@ -23,9 +47,9 @@ else:
     print('Superuser already exists')
 "
 
-# Load initial data
-echo "Loading initial data..."
-python manage.py shell -c "
+  # Load initial data
+  echo "Loading initial data..."
+  python manage.py shell -c "
 from sports.models import Sport, League, Team, Match
 import json
 from datetime import datetime, timedelta
@@ -67,5 +91,8 @@ for league_data in leagues_data:
 
 print('Initial data loaded successfully')
 "
+else
+  echo "Skipping startup migrations and seed data."
+fi
 
 exec "$@"

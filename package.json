@@ -1,6 +1,7 @@
 {
   "name": "sports-portal-frontend",
   "version": "1.0.0",
+  "type": "module",
   "description": "React frontend for Django Sports Portal",
   "main": "index.js",
   "scripts": {
