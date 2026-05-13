@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from .models import (
     User, Sport, League, Team, Venue, Match,
     StreamSource, ScoreEvent, Article,
-    AdPlacement, AdCreative, AuditLog
+    AdPlacement, AdCreative, AuditLog, IPTVChannel
 )
 
 
@@ -91,6 +91,15 @@ class StreamSourceAdmin(admin.ModelAdmin):
     list_filter = ('provider', 'is_active', 'requires_auth')
     search_fields = ('match__home_team__name', 'match__away_team__name', 'url')
     readonly_fields = ('created_at',)
+
+
+@admin.register(IPTVChannel)
+class IPTVChannelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'country_code', 'language', 'is_featured', 'is_active', 'source_name')
+    list_filter = ('is_active', 'is_featured', 'category', 'country_code', 'language', 'source_name')
+    search_fields = ('name', 'tvg_id', 'stream_url', 'country', 'country_code', 'language')
+    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('source_id', 'imported_at', 'created_at')
 
 
 @admin.register(ScoreEvent)

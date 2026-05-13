@@ -173,6 +173,39 @@ class StreamSource(models.Model):
         ordering = ['-priority', '-created_at']
 
 
+class IPTVChannel(models.Model):
+    """Public IPTV channel metadata imported from external playlist sources."""
+
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=280, unique=True)
+    stream_url = models.URLField(validators=[URLValidator()], max_length=1000)
+    source_id = models.CharField(max_length=300, unique=True)
+    source_name = models.CharField(max_length=100, default='iptv-org')
+    source_url = models.URLField(max_length=1000, blank=True)
+
+    tvg_id = models.CharField(max_length=255, blank=True)
+    logo = models.URLField(max_length=1000, blank=True)
+    category = models.CharField(max_length=120, blank=True)
+    country = models.CharField(max_length=120, blank=True)
+    country_code = models.CharField(max_length=12, blank=True)
+    language = models.CharField(max_length=120, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+    imported_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['category', 'country_code']),
+            models.Index(fields=['is_active', 'is_featured']),
+        ]
+
+
 class ScoreEvent(models.Model):
     """Real-time score events during matches"""
     EVENT_TYPES = [

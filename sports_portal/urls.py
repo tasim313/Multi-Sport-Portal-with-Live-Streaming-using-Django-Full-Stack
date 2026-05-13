@@ -12,7 +12,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from sports.views import (
     SportViewSet, LeagueViewSet, TeamViewSet, MatchViewSet, ArticleViewSet,
-    live_matches, upcoming_matches, standings, get_ads, create_score_event,
+    IPTVChannelViewSet, live_matches, upcoming_matches, standings, get_ads, create_score_event,
     search, register_user, user_profile, index
 )
 
@@ -23,6 +23,7 @@ router.register(r'leagues', LeagueViewSet, basename='league')
 router.register(r'teams', TeamViewSet, basename='team')
 router.register(r'matches', MatchViewSet, basename='match')
 router.register(r'articles', ArticleViewSet, basename='article')
+router.register(r'iptv/channels', IPTVChannelViewSet, basename='iptv-channel')
 
 urlpatterns = [
     # Django Admin

@@ -12,7 +12,7 @@ import logging
 
 from .models import (
     Sport, League, Team, Match, StreamSource, ScoreEvent,
-    Article, AdPlacement, AdCreative, AuditLog
+    Article, AdPlacement, AdCreative, AuditLog, IPTVChannel
 )
 
 User = get_user_model()
@@ -83,6 +83,21 @@ class ArticleSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'body', 'excerpt', 'author',
             'tags', 'hero_image', 'published_at', 'meta_description'
         ]
+
+
+class IPTVChannelSerializer(serializers.ModelSerializer):
+    attribution = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IPTVChannel
+        fields = [
+            'id', 'name', 'slug', 'stream_url', 'logo', 'category',
+            'country', 'country_code', 'language', 'is_featured',
+            'source_name', 'source_url', 'attribution'
+        ]
+
+    def get_attribution(self, obj):
+        return f"Channel metadata from {obj.source_name}. Streams play from their original public URLs."
 
 
 # ─── ViewSets ────────────────────────────────────────────────────────────────
@@ -216,6 +231,49 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
             status='published',
             published_at__lte=timezone.now()
         ).select_related('author').order_by('-published_at')
+
+
+@extend_schema_view(
+    list=extend_schema(tags=['iptv'], summary='List public IPTV channels', parameters=[
+        OpenApiParameter('q', OpenApiTypes.STR, description='Search by channel name'),
+        OpenApiParameter('category', OpenApiTypes.STR, description='Filter by group/category, e.g. Sports'),
+        OpenApiParameter('country', OpenApiTypes.STR, description='Filter by country code or country name'),
+        OpenApiParameter('language', OpenApiTypes.STR, description='Filter by language'),
+        OpenApiParameter('featured', OpenApiTypes.BOOL, description='Only featured channels'),
+    ]),
+    retrieve=extend_schema(tags=['iptv'], summary='Get a single IPTV channel'),
+)
+class IPTVChannelViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = IPTVChannelSerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'slug'
+
+    def get_queryset(self):
+        queryset = IPTVChannel.objects.filter(is_active=True)
+
+        q = self.request.query_params.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(name__icontains=q)
+
+        category = self.request.query_params.get('category', '').strip()
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+
+        country = self.request.query_params.get('country', '').strip()
+        if country:
+            queryset = queryset.filter(
+                Q(country_code__iexact=country) | Q(country__icontains=country)
+            )
+
+        language = self.request.query_params.get('language', '').strip()
+        if language:
+            queryset = queryset.filter(language__icontains=language)
+
+        featured = self.request.query_params.get('featured')
+        if featured in ['1', 'true', 'True']:
+            queryset = queryset.filter(is_featured=True)
+
+        return queryset.order_by('-is_featured', 'name')
 
 
 # ─── Function-based API views ────────────────────────────────────────────────
