@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-sports-portal-dev-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0,103.166.187.149', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition
 DJANGO_APPS = [
@@ -77,7 +77,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            BASE_DIR / 'frontend' / 'build',
             BASE_DIR / 'templates',
+            BASE_DIR,
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -98,16 +100,24 @@ ASGI_APPLICATION = 'sports_portal.asgi.application'
 AUTH_USER_MODEL = 'sports.User'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='sports_portal'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+if config('USE_SQLITE_FALLBACK', default=False, cast=bool):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='sports_portal'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default='postgres'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+        }
+    }
 
 # Redis & Channels
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
@@ -273,6 +283,10 @@ STATICFILES_DIRS = [
 _vite_build = BASE_DIR / 'frontend' / 'build' / 'static'
 if _vite_build.exists():
     STATICFILES_DIRS.append(_vite_build)
+
+_vite_public_build = BASE_DIR / 'frontend' / 'build'
+if _vite_public_build.exists():
+    STATICFILES_DIRS.append(_vite_public_build)
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
