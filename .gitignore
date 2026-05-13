@@ -1,0 +1,31 @@
+# Python
+venv_new/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Django
+*.log
+staticfiles/
+media/
+db.sqlite3
+.env
+
+# Node
+node_modules/
+package-lock.json
+frontend/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

@@ -34,9 +34,10 @@ python-dotenv==1.0.0
 Pillow==10.1.0
 django-extensions==3.2.3
 
-# Production
+# Production / ASGI
 gunicorn==21.2.0
 whitenoise==6.6.0
+daphne==4.0.0
 
 # Monitoring
 sentry-sdk==1.38.0

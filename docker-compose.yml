@@ -19,7 +19,6 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -28,8 +27,13 @@ services:
       - db
       - redis
     environment:
+      - DJANGO_SETTINGS_MODULE=sports_portal.settings
       - DEBUG=1
+      - DB_NAME=sports_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
       - DB_HOST=db
+      - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
 
   celery:
@@ -41,8 +45,31 @@ services:
       - db
       - redis
     environment:
+      - DJANGO_SETTINGS_MODULE=sports_portal.settings
       - DEBUG=1
+      - DB_NAME=sports_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
       - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+
+  celery-beat:
+    build: .
+    command: celery -A sports_portal beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=sports_portal.settings
+      - DEBUG=1
+      - DB_NAME=sports_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
 
   nginx:
@@ -50,8 +77,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./staticfiles:/var/www/static
+      - ./media:/var/www/media
     depends_on:
       - web
 
