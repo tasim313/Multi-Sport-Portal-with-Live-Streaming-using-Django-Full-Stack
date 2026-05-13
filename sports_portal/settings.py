@@ -152,13 +152,65 @@ SIMPLE_JWT = {
 
 # JWT Auth URLs
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Sports Portal API',
-    'DESCRIPTION': 'Comprehensive sports portal with live streaming and real-time updates',
+    'TITLE': 'Multi-Sport Portal API',
+    'DESCRIPTION': """
+## Overview
+REST API for the Multi-Sport Portal — supporting Cricket, Football, and Tennis with
+live streaming, real-time score updates (WebSocket), news articles, ad management,
+and role-based access control.
+
+## Authentication
+This API uses **JWT (Bearer token)** authentication.
+
+1. Call `POST /api/auth/token/` with your username and password to get an access token.
+2. Include the token in subsequent requests:
+   ```
+   Authorization: Bearer <access_token>
+   ```
+3. Access tokens expire after **60 minutes**. Use `POST /api/auth/token/refresh/` with
+   your refresh token to get a new access token (refresh tokens last **7 days**).
+
+## User Roles
+| Role | Description |
+|------|-------------|
+| `anonymous` | Read-only access to public matches and articles |
+| `registered` | Auth-required streams and profile management |
+| `subscriber` | Premium content access |
+| `editor` | Can create score events and articles |
+| `streamer_admin` | Full match and stream management |
+| `sysadmin` | Full system access |
+
+## Real-Time Updates
+Connect via WebSocket at `ws://<host>/ws/matches/<match_id>/` to receive live score
+events (`score_update`) and match status changes (`match_status_update`) pushed
+in real time without polling.
+
+## Pagination
+All list endpoints use page-number pagination. Default page size is **20**.
+Use `?page=2` to navigate. Response includes `count`, `next`, and `previous`.
+""",
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    # Silence noisy Wagtail admin API warnings in schema generation
+    'CONTACT': {
+        'name': 'Sports Portal Team',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    'TAGS': [
+        {'name': 'sports', 'description': 'Sport categories (Cricket, Football, Tennis)'},
+        {'name': 'leagues', 'description': 'Leagues and tournaments within a sport'},
+        {'name': 'teams', 'description': 'Teams and clubs'},
+        {'name': 'matches', 'description': 'Match scheduling, live status, streams, and score events'},
+        {'name': 'articles', 'description': 'News articles published via CMS'},
+        {'name': 'auth', 'description': 'JWT authentication, registration, and user profile'},
+        {'name': 'ads', 'description': 'Ad placement and creative retrieval'},
+        {'name': 'search', 'description': 'Global search across matches, articles, and teams'},
+    ],
     'POSTPROCESSING_HOOKS': ['drf_spectacular.hooks.postprocess_schema_enums'],
     'DISABLE_ERRORS_AND_WARNINGS': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': False,
 }
 
 # CORS Settings

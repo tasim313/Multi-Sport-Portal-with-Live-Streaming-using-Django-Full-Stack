@@ -7,7 +7,7 @@ from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, inline_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiTypes, inline_serializer
 import logging
 
 from .models import (
@@ -87,12 +87,22 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 # ─── ViewSets ────────────────────────────────────────────────────────────────
 
+@extend_schema_view(
+    list=extend_schema(tags=['sports'], summary='List all active sports'),
+    retrieve=extend_schema(tags=['sports'], summary='Get a single sport'),
+)
 class SportViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Sport.objects.filter(is_active=True)
     serializer_class = SportSerializer
     permission_classes = [permissions.AllowAny]
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['leagues'], summary='List all leagues', parameters=[
+        OpenApiParameter('sport', OpenApiTypes.STR, description='Filter by sport slug e.g. cricket')
+    ]),
+    retrieve=extend_schema(tags=['leagues'], summary='Get a single league'),
+)
 class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = LeagueSerializer
     permission_classes = [permissions.AllowAny]
@@ -105,6 +115,12 @@ class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['teams'], summary='List all teams', parameters=[
+        OpenApiParameter('league', OpenApiTypes.STR, description='Filter by league slug e.g. ipl')
+    ]),
+    retrieve=extend_schema(tags=['teams'], summary='Get a single team'),
+)
 class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TeamSerializer
     permission_classes = [permissions.AllowAny]
@@ -117,6 +133,14 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['matches'], summary='List matches', parameters=[
+        OpenApiParameter('status', OpenApiTypes.STR, description='Filter by status: live, upcoming, finished'),
+        OpenApiParameter('sport', OpenApiTypes.STR, description='Filter by sport slug'),
+        OpenApiParameter('league', OpenApiTypes.STR, description='Filter by league slug'),
+    ]),
+    retrieve=extend_schema(tags=['matches'], summary='Get a single match'),
+)
 class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MatchSerializer
     permission_classes = [permissions.AllowAny]
@@ -146,6 +170,9 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset.order_by('-start_time')
 
+    @extend_schema(tags=['matches'], summary='Get best active stream for a match',
+                   description='Returns the highest-priority active stream. Unauthenticated users only see public streams (requires_auth=False).',
+                   responses={200: StreamSourceSerializer})
     @action(detail=True, methods=['get'])
     def streams(self, request, pk=None):
         """Get active streams for a match"""
@@ -164,6 +191,9 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
+    @extend_schema(tags=['matches'], summary='List score events for a match',
+                   description='Returns the last 50 score events (goals, wickets, cards, etc.) for this match.',
+                   responses={200: ScoreEventSerializer(many=True)})
     @action(detail=True, methods=['get'])
     def events(self, request, pk=None):
         """Get score events for a match"""
@@ -172,6 +202,10 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(ScoreEventSerializer(events, many=True).data)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['articles'], summary='List published news articles'),
+    retrieve=extend_schema(tags=['articles'], summary='Get article by slug'),
+)
 class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ArticleSerializer
     permission_classes = [permissions.AllowAny]
@@ -186,7 +220,7 @@ class ArticleViewSet(viewsets.ReadOnlyModelViewSet):
 
 # ─── Function-based API views ────────────────────────────────────────────────
 
-@extend_schema(responses=MatchSerializer(many=True), summary="List all currently live matches")
+@extend_schema(tags=['matches'], responses=MatchSerializer(many=True), summary="List all currently live matches")
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def live_matches(request):
@@ -196,7 +230,7 @@ def live_matches(request):
     return Response(MatchSerializer(matches, many=True).data)
 
 
-@extend_schema(responses=MatchSerializer(many=True), summary="List upcoming scheduled matches")
+@extend_schema(tags=['matches'], responses=MatchSerializer(many=True), summary="List upcoming scheduled matches")
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def upcoming_matches(request):
@@ -208,6 +242,7 @@ def upcoming_matches(request):
 
 
 @extend_schema(
+    tags=['matches'],
     parameters=[OpenApiParameter('league', OpenApiTypes.STR, description='League slug', required=True)],
     responses={200: inline_serializer('StandingsResponse', fields={
         'league': LeagueSerializer(),
@@ -256,7 +291,9 @@ def standings(request):
         )
 
 
-@extend_schema(request=ScoreEventSerializer, responses=ScoreEventSerializer, summary="Create a score event and broadcast via WebSocket (editors/admins only)")
+@extend_schema(tags=['matches'], request=ScoreEventSerializer, responses=ScoreEventSerializer,
+               summary="Create a score event and broadcast via WebSocket",
+               description="Creates a score event (goal, wicket, card, etc.) for a live match and immediately broadcasts it to all WebSocket clients watching that match. Requires editor role or above.")
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_score_event(request, match_id):
@@ -316,6 +353,7 @@ def create_score_event(request, match_id):
 
 
 @extend_schema(
+    tags=['ads'],
     parameters=[
         OpenApiParameter('slot', OpenApiTypes.STR, description='Ad slot key e.g. header_banner'),
         OpenApiParameter('device', OpenApiTypes.STR, description='Device type: all/desktop/mobile/tablet'),
@@ -370,6 +408,7 @@ def get_ads(request):
 
 
 @extend_schema(
+    tags=['search'],
     parameters=[OpenApiParameter('q', OpenApiTypes.STR, description='Search query (min 2 chars)', required=True)],
     responses={200: inline_serializer('SearchResponse', fields={
         'matches': MatchSerializer(many=True),
@@ -411,6 +450,7 @@ def search(request):
 
 
 @extend_schema(
+    tags=['auth'],
     request=inline_serializer('RegisterRequest', fields={
         'username': serializers.CharField(),
         'email': serializers.EmailField(),
@@ -459,6 +499,7 @@ def register_user(request):
 
 @extend_schema(
     methods=['GET'],
+    tags=['auth'],
     responses={200: inline_serializer('UserProfileResponse', fields={
         'id': serializers.IntegerField(),
         'username': serializers.CharField(),
@@ -473,6 +514,7 @@ def register_user(request):
 )
 @extend_schema(
     methods=['PATCH'],
+    tags=['auth'],
     request=inline_serializer('UserProfileUpdate', fields={
         'favorite_teams': serializers.JSONField(required=False),
         'notification_prefs': serializers.JSONField(required=False),
