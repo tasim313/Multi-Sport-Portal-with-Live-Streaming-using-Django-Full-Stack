@@ -239,7 +239,8 @@ CSP_FRAME_SRC = ("'self'", "https://www.youtube.com", "https://player.vimeo.com"
 CSP_IMG_SRC = ("'self'", "data:", "https:", "http:")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
 CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
-CSP_CONNECT_SRC = ("'self'", "ws:", "wss:")
+CSP_CONNECT_SRC = ("'self'", "ws:", "wss:", "https:", "http:")
+CSP_MEDIA_SRC = ("'self'", "https:", "http:", "blob:")
 
 # Security Settings (always on)
 SECURE_BROWSER_XSS_FILTER = True
