@@ -180,7 +180,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
               </div>
               <div className="flex justify-between">
                 <dt className="text-zinc-500">Time</dt>
-                <dd className="text-zinc-100">{format(new Date(match.start_time), 'HH:mm UTC')}</dd>
+                <dd className="text-zinc-100">{format(new Date(match.start_time), "HH:mm 'UTC'")}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-zinc-500">Streams</dt>
