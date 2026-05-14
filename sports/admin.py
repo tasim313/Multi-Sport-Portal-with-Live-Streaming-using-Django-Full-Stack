@@ -4,7 +4,8 @@ from django.utils.html import format_html
 from .models import (
     User, Sport, League, Team, Venue, Match,
     StreamSource, ScoreEvent, Article,
-    AdPlacement, AdCreative, AuditLog, IPTVChannel
+    AdPlacement, AdCreative, AuditLog, IPTVChannel,
+    EPGProgram, LiveCommentary, PlayerProfile, LeagueTable, UserFavorite
 )
 
 
@@ -15,7 +16,7 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'email', 'first_name', 'last_name')
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Sports Portal', {
-            'fields': ('role', 'is_premium', 'favorite_teams', 'notification_prefs')
+            'fields': ('role', 'is_premium', 'avatar', 'bio', 'favorite_teams', 'notification_prefs')
         }),
     )
 
@@ -44,6 +45,23 @@ class TeamAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+@admin.register(PlayerProfile)
+class PlayerProfileAdmin(admin.ModelAdmin):
+    list_display = ('name', 'team', 'position', 'nationality', 'jersey_number', 'is_active')
+    list_filter = ('position', 'is_active', 'team__league__sport')
+    search_fields = ('name', 'nationality')
+    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(LeagueTable)
+class LeagueTableAdmin(admin.ModelAdmin):
+    list_display = ('league', 'team', 'season', 'position', 'played', 'won', 'drawn', 'lost', 'points')
+    list_filter = ('league', 'season')
+    search_fields = ('team__name', 'league__name')
+    ordering = ('league', 'position')
+
+
 @admin.register(Venue)
 class VenueAdmin(admin.ModelAdmin):
     list_display = ('name', 'city', 'country', 'capacity')
@@ -61,7 +79,14 @@ class ScoreEventInline(admin.TabularInline):
     model = ScoreEvent
     extra = 0
     readonly_fields = ('timestamp', 'created_at')
-    fields = ('event_type', 'period', 'timestamp', 'payload')
+    fields = ('event_type', 'period', 'minute', 'player_name', 'team_side', 'timestamp', 'payload')
+
+
+class LiveCommentaryInline(admin.TabularInline):
+    model = LiveCommentary
+    extra = 0
+    readonly_fields = ('created_at',)
+    fields = ('minute', 'period', 'rewritten_text', 'is_key_event', 'source')
 
 
 @admin.register(Match)
@@ -69,7 +94,7 @@ class MatchAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'league', 'start_time', 'status', 'get_score', 'stream_count')
     list_filter = ('status', 'league__sport', 'league', 'start_time')
     search_fields = ('home_team__name', 'away_team__name', 'league__name')
-    inlines = [StreamSourceInline, ScoreEventInline]
+    inlines = [StreamSourceInline, ScoreEventInline, LiveCommentaryInline]
     readonly_fields = ('created_at', 'updated_at')
 
     def get_score(self, obj):
@@ -80,8 +105,7 @@ class MatchAdmin(admin.ModelAdmin):
 
     def stream_count(self, obj):
         count = obj.stream_sources.filter(is_active=True).count()
-        return format_html('<span style="color: {};">{}</span>',
-                           'green' if count > 0 else 'red', count)
+        return format_html('<span style="color: {};">{}</span>', 'green' if count > 0 else 'red', count)
     stream_count.short_description = 'Live Streams'
 
 
@@ -93,42 +117,70 @@ class StreamSourceAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 
+class EPGProgramInline(admin.TabularInline):
+    model = EPGProgram
+    extra = 0
+    fields = ('title', 'start_time', 'end_time', 'category')
+    readonly_fields = ('created_at',)
+
+
 @admin.register(IPTVChannel)
 class IPTVChannelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'country_code', 'language', 'is_featured', 'is_active', 'source_name')
-    list_filter = ('is_active', 'is_featured', 'category', 'country_code', 'language', 'source_name')
-    search_fields = ('name', 'tvg_id', 'stream_url', 'country', 'country_code', 'language')
+    list_display = ('name', 'category', 'country_code', 'language', 'is_featured', 'is_active', 'is_working', 'last_checked')
+    list_filter = ('is_active', 'is_featured', 'is_working', 'category', 'country_code', 'source_name')
+    search_fields = ('name', 'tvg_id', 'stream_url', 'country', 'country_code')
     prepopulated_fields = {'slug': ('name',)}
-    readonly_fields = ('source_id', 'imported_at', 'created_at')
+    readonly_fields = ('source_id', 'imported_at', 'created_at', 'last_checked')
+    inlines = [EPGProgramInline]
+
+
+@admin.register(EPGProgram)
+class EPGProgramAdmin(admin.ModelAdmin):
+    list_display = ('channel', 'title', 'start_time', 'end_time', 'category')
+    list_filter = ('category', 'channel')
+    search_fields = ('title', 'channel__name')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(LiveCommentary)
+class LiveCommentaryAdmin(admin.ModelAdmin):
+    list_display = ('match', 'minute', 'period', 'is_key_event', 'source', 'created_at')
+    list_filter = ('source', 'is_key_event', 'language')
+    search_fields = ('match__home_team__name', 'match__away_team__name', 'rewritten_text')
+    readonly_fields = ('created_at',)
+
+    def has_add_permission(self, request):
+        return True
 
 
 @admin.register(ScoreEvent)
 class ScoreEventAdmin(admin.ModelAdmin):
-    list_display = ('match', 'event_type', 'period', 'timestamp')
+    list_display = ('match', 'event_type', 'period', 'minute', 'player_name', 'team_side', 'timestamp')
     list_filter = ('event_type',)
-    search_fields = ('match__home_team__name', 'match__away_team__name')
+    search_fields = ('match__home_team__name', 'match__away_team__name', 'player_name')
     readonly_fields = ('created_at',)
 
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'status', 'published_at', 'created_at')
-    list_filter = ('status', 'author')
+    list_display = ('title', 'author', 'category', 'sport', 'status', 'published_at', 'views_count')
+    list_filter = ('status', 'category', 'sport', 'author')
     search_fields = ('title', 'body', 'excerpt')
     prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'views_count')
 
 
 class AdCreativeInline(admin.TabularInline):
     model = AdCreative
     extra = 1
-    fields = ('name', 'is_active', 'start_at', 'end_at')
+    fields = ('name', 'is_active', 'start_at', 'end_at', 'impressions', 'clicks')
+    readonly_fields = ('impressions', 'clicks')
 
 
 @admin.register(AdPlacement)
 class AdPlacementAdmin(admin.ModelAdmin):
-    list_display = ('label', 'slot_key', 'device_target', 'is_active', 'creative_count')
-    list_filter = ('device_target', 'is_active')
+    list_display = ('label', 'slot_key', 'ad_type', 'device_target', 'is_active', 'creative_count')
+    list_filter = ('ad_type', 'device_target', 'is_active')
     search_fields = ('label', 'slot_key')
     inlines = [AdCreativeInline]
 
@@ -139,9 +191,10 @@ class AdPlacementAdmin(admin.ModelAdmin):
 
 @admin.register(AdCreative)
 class AdCreativeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'placement', 'is_active', 'start_at', 'end_at')
+    list_display = ('name', 'placement', 'is_active', 'start_at', 'end_at', 'impressions', 'clicks')
     list_filter = ('placement', 'is_active')
     search_fields = ('name',)
+    readonly_fields = ('impressions', 'clicks')
 
 
 @admin.register(AuditLog)
@@ -157,3 +210,11 @@ class AuditLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(UserFavorite)
+class UserFavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'item_type', 'item_id', 'item_name', 'created_at')
+    list_filter = ('item_type',)
+    search_fields = ('user__username', 'item_name')
+    readonly_fields = ('created_at',)

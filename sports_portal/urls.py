@@ -12,8 +12,11 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from sports.views import (
     SportViewSet, LeagueViewSet, TeamViewSet, MatchViewSet, ArticleViewSet,
-    IPTVChannelViewSet, live_matches, upcoming_matches, standings, get_ads, create_score_event,
-    search, register_user, user_profile, index
+    IPTVChannelViewSet, PlayerProfileViewSet, LeagueTableViewSet,
+    live_matches, upcoming_matches, standings, get_ads, create_score_event,
+    add_commentary, search, register_user, user_profile,
+    list_favorites, add_favorite, remove_favorite,
+    trigger_iptv_import, index
 )
 
 # API Router
@@ -21,9 +24,11 @@ router = DefaultRouter()
 router.register(r'sports', SportViewSet)
 router.register(r'leagues', LeagueViewSet, basename='league')
 router.register(r'teams', TeamViewSet, basename='team')
+router.register(r'players', PlayerProfileViewSet, basename='player')
 router.register(r'matches', MatchViewSet, basename='match')
 router.register(r'articles', ArticleViewSet, basename='article')
 router.register(r'iptv/channels', IPTVChannelViewSet, basename='iptv-channel')
+router.register(r'standings', LeagueTableViewSet, basename='standings-table')
 
 urlpatterns = [
     # Django Admin
@@ -31,17 +36,20 @@ urlpatterns = [
 
     # Wagtail CMS Admin
     path('cms-admin/', include(wagtailadmin_urls)),
-
-    # Wagtail documents
     path('documents/', include(wagtaildocs_urls)),
 
     # API endpoints
     path('api/', include(router.urls)),
+
+    # Match actions
     path('api/live-matches/', live_matches, name='live-matches'),
     path('api/upcoming-matches/', upcoming_matches, name='upcoming-matches'),
     path('api/standings/', standings, name='standings'),
-    path('api/ads/', get_ads, name='get-ads'),
     path('api/matches/<int:match_id>/events/', create_score_event, name='create-score-event'),
+    path('api/matches/<int:match_id>/commentary/', add_commentary, name='add-commentary'),
+
+    # Ads
+    path('api/ads/', get_ads, name='get-ads'),
 
     # JWT Auth + User
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -50,8 +58,16 @@ urlpatterns = [
     path('api/auth/profile/', user_profile, name='profile'),
     path('api/auth/', include('rest_framework.urls')),
 
+    # User favorites
+    path('api/favorites/', list_favorites, name='list-favorites'),
+    path('api/favorites/add/', add_favorite, name='add-favorite'),
+    path('api/favorites/<str:item_type>/<int:item_id>/', remove_favorite, name='remove-favorite'),
+
     # Search
     path('api/search/', search, name='search'),
+
+    # IPTV admin trigger
+    path('api/iptv/import/', trigger_iptv_import, name='trigger-iptv-import'),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -60,11 +76,10 @@ urlpatterns = [
     # Wagtail CMS pages
     path('cms/', include(wagtail_urls)),
 
-    # React frontend - catch-all
+    # React/Next.js frontend — catch-all
     re_path(r'^(?!api/|django-admin/|cms-admin/|cms/|documents/|static/|media/).*$',
             index, name='frontend'),
 ]
 
-# Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

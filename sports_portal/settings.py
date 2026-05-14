@@ -52,6 +52,9 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'sports',
     'cms_content',
+    'iptv_importer',
+    'crawler',
+    'ai_commentary',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + WAGTAIL_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -229,6 +232,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
+    "http://localhost:4000",  # Next.js alternative port
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -353,9 +357,10 @@ CELERY_TIMEZONE = TIME_ZONE
 
 from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
+    # Match lifecycle
     'auto-start-matches': {
         'task': 'sports.tasks.auto_start_matches',
-        'schedule': 60.0,  # every 60 seconds
+        'schedule': 60.0,
     },
     'auto-finish-matches': {
         'task': 'sports.tasks.auto_finish_matches',
@@ -363,6 +368,45 @@ CELERY_BEAT_SCHEDULE = {
     },
     'cleanup-audit-logs': {
         'task': 'sports.tasks.cleanup_old_audit_logs',
-        'schedule': crontab(hour=2, minute=0),  # daily at 2am
+        'schedule': crontab(hour=2, minute=0),
+    },
+    # IPTV importer — sync all playlists once daily at 3am
+    'sync-iptv-playlists': {
+        'task': 'iptv_importer.tasks.sync_all_iptv_playlists',
+        'schedule': crontab(hour=3, minute=0),
+    },
+    # Stream health check — every 4 hours, batch of 100
+    'check-dead-streams': {
+        'task': 'iptv_importer.tasks.check_dead_streams',
+        'schedule': crontab(minute=0, hour='*/4'),
+    },
+    # Deactivate channels dead for 7+ days — daily at 4am
+    'deactivate-dead-channels': {
+        'task': 'iptv_importer.tasks.deactivate_dead_channels',
+        'schedule': crontab(hour=4, minute=0),
+    },
+    # Live sports crawlers — every 30 seconds during typical match hours
+    'crawl-live-football': {
+        'task': 'crawler.tasks.crawl_live_football',
+        'schedule': 30.0,
+    },
+    'crawl-thesportsdb': {
+        'task': 'crawler.tasks.crawl_thesportsdb',
+        'schedule': 30.0,
+    },
+    'crawl-live-cricket': {
+        'task': 'crawler.tasks.crawl_live_cricket',
+        'schedule': 60.0,
+    },
+    # AI commentary — queue rewrites every 15 seconds
+    'generate-commentary': {
+        'task': 'crawler.tasks.generate_commentary_for_events',
+        'schedule': 15.0,
     },
 }
+
+# External API keys (loaded from .env)
+FOOTBALL_DATA_API_KEY = config('FOOTBALL_DATA_API_KEY', default='')
+CRICKET_API_KEY = config('CRICKET_API_KEY', default='')
+ANTHROPIC_API_KEY = config('ANTHROPIC_API_KEY', default='')
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')

@@ -9,10 +9,11 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sports_portal.settings')
 # Initialize Django ASGI before importing consumers
 django_asgi_app = get_asgi_application()
 
-from sports.consumers import MatchConsumer
+from sports.consumers import MatchConsumer, LiveScoreTickerConsumer
 
 websocket_urlpatterns = [
     path('ws/matches/<int:match_id>/', MatchConsumer.as_asgi()),
+    path('ws/ticker/', LiveScoreTickerConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({
