@@ -26,8 +26,8 @@ export function VideoPlayer({ streams, autoPlay = true }: VideoPlayerProps) {
     setError(false)
     setLoading(true)
 
-    // If stream has embed HTML (YouTube/Vimeo iframe), skip video element
-    if (current.is_iframe && current.embed_html) {
+    // If stream is iframe-based, skip video element setup
+    if (current.is_iframe) {
       setLoading(false)
       return
     }
@@ -104,13 +104,14 @@ export function VideoPlayer({ streams, autoPlay = true }: VideoPlayerProps) {
     )
   }
 
-  // Iframe stream (YouTube/Vimeo)
-  if (current?.is_iframe && current.embed_html) {
+  // Iframe stream (YouTube/Vimeo or any embed)
+  if (current?.is_iframe) {
+    const iframeContent = current.embed_html || `<iframe src="${current.url}" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="position:absolute;inset:0;width:100%;height:100%;"></iframe>`
     return (
       <div className="relative">
         <div
-          className="aspect-video bg-black rounded-xl overflow-hidden"
-          dangerouslySetInnerHTML={{ __html: current.embed_html }}
+          className="aspect-video bg-black rounded-xl overflow-hidden relative"
+          dangerouslySetInnerHTML={{ __html: iframeContent }}
         />
         <StreamSwitcher
           streams={activeStreams}
