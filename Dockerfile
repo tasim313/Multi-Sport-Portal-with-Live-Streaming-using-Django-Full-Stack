@@ -30,7 +30,7 @@ RUN mkdir -p /app/staticfiles /app/media
 # Make entrypoint executable
 RUN chmod +x /app/entrypoint.sh
 
-EXPOSE 8000
+EXPOSE 8002
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "sports_portal.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8002", "sports_portal.asgi:application"]

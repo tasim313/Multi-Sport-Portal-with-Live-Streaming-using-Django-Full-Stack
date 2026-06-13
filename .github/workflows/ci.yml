@@ -108,8 +108,8 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:8000/api
-          NEXT_PUBLIC_WS_URL: ws://localhost:8000
+          NEXT_PUBLIC_API_URL: http://localhost:8002/api
+          NEXT_PUBLIC_WS_URL: ws://localhost:8002
         run: npm run build
 
   # ─── Docker Build & Push ────────────────────────────────────────────────────

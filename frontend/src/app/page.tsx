@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { matchApi, articleApi, iptvApi } from '@/lib/api'
 import { MatchCard } from '@/components/match/MatchCard'
 import { ChannelCard } from '@/components/iptv/ChannelCard'
@@ -6,28 +9,35 @@ import Image from 'next/image'
 import { format } from 'date-fns'
 import { ArrowRight, Play } from 'lucide-react'
 
-async function getData() {
-  try {
-    const [liveMatches, upcomingMatches, articles, channels] = await Promise.allSettled([
-      matchApi.live(),
-      matchApi.upcoming(),
-      articleApi.list({ page_size: '6' }),
-      iptvApi.list({ category: 'Sports', page_size: '8', working: '1' }),
-    ])
+export default function HomePage() {
+  const [liveMatches, setLiveMatches] = useState<any[]>([])
+  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([])
+  const [articles, setArticles] = useState<any[]>([])
+  const [channels, setChannels] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-    return {
-      liveMatches: liveMatches.status === 'fulfilled' ? liveMatches.value : [],
-      upcomingMatches: upcomingMatches.status === 'fulfilled' ? upcomingMatches.value : [],
-      articles: articles.status === 'fulfilled' ? articles.value.results : [],
-      channels: channels.status === 'fulfilled' ? channels.value.results : [],
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const settled: any = await Promise.allSettled([
+          matchApi.live(),
+          matchApi.upcoming(),
+          articleApi.list({ page_size: '6' }),
+          iptvApi.list({ page_size: '8', working: '1' }),
+        ])
+        setLiveMatches(settled[0].status === 'fulfilled' ? settled[0].value : [])
+        setUpcomingMatches(settled[1].status === 'fulfilled' ? settled[1].value : [])
+        setArticles(settled[2].status === 'fulfilled' ? settled[2].value.results : [])
+        setChannels(settled[3].status === 'fulfilled' ? settled[3].value.results : [])
+      } catch {
+        // leave empty
+      } finally {
+        setLoading(false)
+      }
     }
-  } catch {
-    return { liveMatches: [], upcomingMatches: [], articles: [], channels: [] }
-  }
-}
-
-export default async function HomePage() {
-  const { liveMatches, upcomingMatches, articles, channels } = await getData()
+    fetchData()
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
@@ -96,7 +106,7 @@ export default async function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="section-title">Sports TV Channels</h2>
-            <Link href="/iptv?category=Sports" className="text-sm text-zinc-400 hover:text-zinc-100 flex items-center gap-1">
+            <Link href="/iptv" className="text-sm text-zinc-400 hover:text-zinc-100 flex items-center gap-1">
               All channels <ArrowRight size={14} />
             </Link>
           </div>

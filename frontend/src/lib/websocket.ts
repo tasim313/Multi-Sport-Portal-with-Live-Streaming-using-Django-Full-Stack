@@ -3,7 +3,7 @@
  * Manages connections to Django Channels WebSocket endpoints.
  */
 
-const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8002'
 
 export type WSCallback = (data: unknown) => void
 export type MessageHandler = (type: string, data: unknown) => void
@@ -85,7 +85,7 @@ export class SportWebSocket {
   private _startPing(): void {
     this.pingInterval = setInterval(() => {
       this.send({ type: 'ping' })
-    }, 30000)
+    }, 30020)
   }
 
   private _stopPing(): void {
@@ -97,7 +97,7 @@ export class SportWebSocket {
 
   private _scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnects) return
-    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000)
+    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30020)
     this.reconnectAttempts++
     this.reconnectTimeout = setTimeout(() => this.connect(), delay)
   }

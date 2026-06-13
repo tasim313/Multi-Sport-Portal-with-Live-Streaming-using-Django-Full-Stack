@@ -56,14 +56,14 @@ echo "  Starting services (press Ctrl+C to stop all)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Kill any existing processes on our ports
-lsof -ti:8000 | xargs kill -9 2>/dev/null || true
-lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+lsof -ti:8004 | xargs kill -9 2>/dev/null || true
+lsof -ti:3004 | xargs kill -9 2>/dev/null || true
 sleep 1
 
 # ── 5. Start Django (Daphne ASGI) ──────────────────────────────────────────
-echo "  [Django]  http://localhost:8000"
+echo "  [Django]  http://localhost:8004"
 cd "$PROJECT_DIR"
-$PYTHON -m daphne -b 0.0.0.0 -p 8000 sports_portal.asgi:application \
+$PYTHON -m daphne -b 0.0.0.0 -p 8004 sports_portal.asgi:application \
   > "$LOG_DIR/django.log" 2>&1 &
 DJANGO_PID=$!
 
@@ -86,7 +86,7 @@ $PROJECT_DIR/venv_new/bin/celery -A sports_portal beat \
 BEAT_PID=$!
 
 # ── 8. Start Next.js Dev ───────────────────────────────────────────────────
-echo "  [Next.js] http://localhost:3000"
+echo "  [Next.js] http://localhost:3004"
 cd "$PROJECT_DIR/frontend"
 npm run dev > "$LOG_DIR/nextjs.log" 2>&1 &
 NEXT_PID=$!
@@ -95,11 +95,11 @@ echo ""
 echo "  All services started!"
 echo ""
 echo "  URLs:"
-echo "    Frontend:    http://localhost:3000"
-echo "    API:         http://localhost:8000/api/"
-echo "    API Docs:    http://localhost:8000/api/docs/"
-echo "    Django Admin: http://localhost:8000/django-admin/"
-echo "    Wagtail CMS:  http://localhost:8000/cms-admin/"
+echo "    Frontend:    http://localhost:3004"
+echo "    API:         http://localhost:8004/api/"
+echo "    API Docs:    http://localhost:8004/api/docs/"
+echo "    Django Admin: http://localhost:8004/django-admin/"
+echo "    Wagtail CMS:  http://localhost:8004/cms-admin/"
 echo "    Admin login:  admin / admin123"
 echo ""
 echo "  Logs in: $LOG_DIR/"
