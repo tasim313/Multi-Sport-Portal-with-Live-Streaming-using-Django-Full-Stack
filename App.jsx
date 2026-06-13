@@ -13,7 +13,7 @@ import {
 
 // ─── API Setup ───────────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:8000/api';
+const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:8002/api';
 
 const api = axios.create({ baseURL: API_BASE, timeout: 10000 });
 
@@ -108,7 +108,7 @@ const useWebSocket = (matchId) => {
 
   useEffect(() => {
     if (!matchId) return;
-    const wsBase = import.meta.env.PROD ? `wss://${window.location.host}` : 'ws://localhost:8000';
+    const wsBase = import.meta.env.PROD ? `wss://${window.location.host}` : 'ws://localhost:8002';
     const ws = new WebSocket(`${wsBase}/ws/matches/${matchId}/`);
     ws.onmessage = e => {
       const data = JSON.parse(e.data);
@@ -128,7 +128,7 @@ const useMatches = (filters = {}) =>
   useQuery(['matches', filters], async () => {
     const { data } = await api.get('/matches/', { params: filters });
     return data;
-  }, { refetchInterval: 30000 });
+  }, { refetchInterval: 30020 });
 
 const useMatch = id =>
   useQuery(['match', id], async () => {
@@ -1393,7 +1393,7 @@ const NotFoundPage = () => (
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 30000, retry: 1 },
+    queries: { staleTime: 30020, retry: 1 },
   },
 });
 

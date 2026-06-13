@@ -122,7 +122,7 @@ Admins and editors can:
                                  │
                                  ▼
                   ┌──────────────────────────────────┐
-                  │    Daphne ASGI (port 8000)        │
+                  │    Daphne ASGI (port 8002)        │
                   │    Django 5 + Channels 4          │
                   ├───────────────┬──────────────────┤
                   │  REST API     │  WebSocket        │
@@ -210,7 +210,7 @@ This creates:
 
 ```bash
 python manage.py runserver
-# Running on http://localhost:8000
+# Running on http://localhost:8002
 ```
 
 ### 7. Install and start the React frontend
@@ -247,7 +247,7 @@ DB_PORT=5432
 
 REDIS_URL=redis://localhost:6379/0
 
-WAGTAIL_BASE_URL=http://localhost:8000
+WAGTAIL_BASE_URL=http://localhost:8002
 ```
 
 For **production**, set `DEBUG=False` — this automatically activates:
@@ -270,7 +270,7 @@ Services started:
 |---------|-------------|------|
 | `db` | PostgreSQL 15 | 5432 |
 | `redis` | Redis 7 | 6379 |
-| `web` | Django + Daphne | 8000 |
+| `web` | Django + Daphne | 8002 |
 | `celery` | Celery Worker | — |
 | `celery-beat` | Celery Scheduler | — |
 | `nginx` | Reverse Proxy | 80 |
@@ -289,8 +289,8 @@ Access points:
 
 ## API Reference
 
-Interactive Swagger documentation: **http://localhost:8000/api/docs/**
-OpenAPI 3 schema (JSON): **http://localhost:8000/api/schema/**
+Interactive Swagger documentation: **http://localhost:8002/api/docs/**
+OpenAPI 3 schema (JSON): **http://localhost:8002/api/schema/**
 
 ### Authentication
 
@@ -469,7 +469,7 @@ PATCH body (only these two fields are writable):
 Connect to a match room to receive live updates:
 
 ```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/matches/1/');
+const ws = new WebSocket('ws://localhost:8002/ws/matches/1/');
 
 ws.onopen = () => console.log('Connected to match room');
 
@@ -518,7 +518,7 @@ Roles are set in Django Admin → Users → Role field.
 
 ## Admin Panels
 
-### Django Admin — `http://localhost:8000/django-admin/`
+### Django Admin — `http://localhost:8002/django-admin/`
 
 | Section | What you can do |
 |---------|----------------|
@@ -530,7 +530,7 @@ Roles are set in Django Admin → Users → Role field.
 | Ad Placements | Configure ad slots and upload creatives |
 | Audit Log | Read-only log of all admin actions (actor, IP, before/after data) |
 
-### Wagtail CMS — `http://localhost:8000/cms-admin/`
+### Wagtail CMS — `http://localhost:8002/cms-admin/`
 
 | Section | What you can do |
 |---------|----------------|

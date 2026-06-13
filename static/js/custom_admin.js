@@ -180,7 +180,7 @@ function initLiveDataRefresh() {
                     }, 1000);
                 });
             }
-        }, 30000);
+        }, 30020);
     }
 }
 

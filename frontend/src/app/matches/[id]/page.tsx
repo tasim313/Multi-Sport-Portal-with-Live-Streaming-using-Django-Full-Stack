@@ -24,7 +24,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   const { data: match, isLoading } = useQuery({
     queryKey: ['match', matchId],
     queryFn: () => matchApi.get(matchId),
-    refetchInterval: (query) => query.state.data?.status === 'live' ? 30000 : false,
+    refetchInterval: (query) => query.state.data?.status === 'live' ? 30020 : false,
   })
 
   const { data: commentary } = useQuery({

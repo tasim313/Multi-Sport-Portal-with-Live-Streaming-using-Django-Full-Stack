@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-sports-portal-dev-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0,103.166.187.149', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0,103.166.187.149,103.166.187.149:8002', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition
 DJANGO_APPS = [
@@ -228,11 +228,13 @@ Use `?page=2` to navigate. Response includes `count`, `next`, and `previous`.
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "http://localhost:3002",
     "http://localhost:5173",
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3002",
     "http://127.0.0.1:5173",
     "http://localhost:4000",  # Next.js alternative port
+    "http://103.166.187.149:3002",  # Frontend external IP
+    "http://103.166.187.149:8002",  # Backend external IP
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -302,7 +304,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Wagtail settings
 WAGTAIL_SITE_NAME = 'Sports Portal CMS'
 WAGTAIL_ADMIN_URL = 'cms-admin'
-WAGTAILADMIN_BASE_URL = config('WAGTAIL_BASE_URL', default='http://localhost:8000')
+WAGTAILADMIN_BASE_URL = config('WAGTAIL_BASE_URL', default='http://localhost:8002')
 WAGTAILSEARCH_BACKENDS = {
     'default': {
         'BACKEND': 'wagtail.search.backends.database',

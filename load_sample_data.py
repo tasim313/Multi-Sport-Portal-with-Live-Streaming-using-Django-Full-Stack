@@ -105,7 +105,7 @@ print("Teams created.")
 # ─── Venues ──────────────────────────────────────────────────────────────────
 wankhede, _ = Venue.objects.get_or_create(
     name='Wankhede Stadium', city='Mumbai',
-    defaults={'country': 'India', 'capacity': 33000}
+    defaults={'country': 'India', 'capacity': 33002}
 )
 old_trafford, _ = Venue.objects.get_or_create(
     name='Old Trafford', city='Manchester',

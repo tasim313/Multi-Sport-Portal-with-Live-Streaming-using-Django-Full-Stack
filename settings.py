@@ -7,7 +7,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-sports-portal-dev-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,0.0.0.0,103.166.187.149', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '103.166.187.149',
+    'localhost:8004',
+    '127.0.0.1:8004',
+    '103.166.187.149:8004',
+    '103.166.187.149:3004',
+]
 
 # Application definition
 DJANGO_APPS = [
@@ -46,6 +55,7 @@ THIRD_PARTY_APPS = [
     'csp',
     'axes',
     'drf_spectacular',
+    'django_celery_beat',
 ]
 
 LOCAL_APPS = [
@@ -149,8 +159,12 @@ SIMPLE_JWT = {
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:3002",
+    "http://127.0.0.1:3002",
+    "http://localhost:3004",
+    "http://127.0.0.1:3004",
+    "http://103.166.187.149:8004",
+    "http://103.166.187.149:3004",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -181,7 +195,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Wagtail settings
 WAGTAIL_SITE_NAME = 'Sports Portal CMS'
 WAGTAIL_ADMIN_URL = 'cms-admin'  # Hide the fact it's Wagtail
-WAGTAILADMIN_BASE_URL = 'http://localhost:8000'
+WAGTAILADMIN_BASE_URL = 'http://localhost:8002'
 
 # Custom Wagtail branding
 WAGTAIL_ADMIN_LOGO = '/images/SportsPortalLogo.jpg'
